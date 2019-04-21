@@ -1,0 +1,107 @@
+# Sample data found on the block
+{
+    "hash": "...",
+    "ver": "...",
+    "prev_block": "...",
+    "time": "...",
+    "bits": "...",
+    "nonce":"...",
+    "size": "...",
+    "block_index": "...",
+    "main_chain": true,
+    "height": "...",
+    "received_time": "...",
+    "relayed_by": "...",
+    "tx":[--User Data--]
+    "user_id" : {
+                "name" : {
+                            "first" : "...",
+                            "middle" : "...",
+                            "last" : "..."
+                         }
+                "national_id": "...",
+                "birth_datetime" : "...",
+                "sex" : "...",
+                "father" : "...",
+                "mother" : "...",
+                "prev_address1" : {
+                                    "street" : "...",
+                                    "city" : "..."
+                                    "state" : "..."
+                                    "zip" : "..."
+                                   }, 
+                "current_address": {
+                                      "street" : "...",
+                                      "city" : "..."
+                                      "state" : "..."
+                                      "zip" : "..."
+                                    },
+                "prev_work1" : {
+                                  "name" : "...",
+                                  "salary" : "..."
+                                  "street" : "...",
+                                  "city" : "..."
+                                  "state" : "..."
+                                  "zip" : "..."
+                                },
+                "current_work" : {
+                                    "name" : "...",
+                                    "salary" : "..."
+                                    "street" : "...",
+                                    "city" : "..."
+                                    "state" : "..."
+                                    "zip" : "..."
+                                  },
+                "marital_status" : "...",
+                "spouse" : "..."
+                "data_lessee" : {
+                                  ["institution_id": "...",
+                                  "tier": "..."],
+                                  ...
+                                }
+            }
+}
+
+
+
+import json
+import datetime
+
+#get user info from current block
+def get_info(current_block, user_id):
+    data = json.load(current_block)
+    try:
+        if user_id in data:
+            return jsonify(data[user_id])
+    except:
+        print("No such person.")
+    
+#tier 1, returns only name and current state    
+def tier1(current_block, user_id):
+    temp = get_info(current_block, user_id)
+    return jsonify("user_id" : user_id,
+                  "name" : temp["name"],
+                  "current_state" : temp["current_address"]["state"])
+    temp = {}
+    
+#tier 2, returns name, current address, age, sex and income
+def tier2(current_block, user_id):
+    temp = get_info(current_block, user_id)
+    return jsonify("user_id" : user_id,
+                  "name" : temp["name"],
+                  "current_address" : temp["current_address"],
+                  "age" : datetime.now() - temp["birth_datetime"],
+                  "sex" : temp["sex"],
+                  "income" : temp["current_work"]["salary"])
+    temp = {}
+    
+#tier 3, returns all informations available    
+def tier3(current_block, user_id):
+    return get_info(current_block, user_id)
+
+#returns list of lessee that currently leasing the data and what tier they are on.  If the data added are in their tier
+#they can be contacted with an automated smart_contract to update their database
+def update_notify(current_block, user_id):
+    temp = get_info(current_block, user_id)
+    return jsonify(temp["data_lessee"])
+    temp = {}
